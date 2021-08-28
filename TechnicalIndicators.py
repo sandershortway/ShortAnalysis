@@ -25,7 +25,48 @@ def MACD(DF,x,y,z):
 def sMA(DF,n):
     df = DF.copy()
     df["sMA"] = df["Close"].rolling(n).mean()
-    return df
+    return df.sMA
+
+# Weighted Moving Average
+def wMA(DF,n):
+    df = DF.copy()
+    n = round(n)
+    P = df["Close"].to_list()
+    W = []
+    d = n * (n+1) / 2
+    for i in range(0,len(df)):
+        w = 0
+        v = 1
+        if (i < n - 1):
+            W.append(np.nan)
+        else:
+            for j in range(i - n + 1, i + 1):
+                w += v * P[j]
+                v += 1
+            W.append(w/d)
+    df["wMA"] = W
+    return df.wMA
+
+# Hull Moving Average
+def HullMA(DF,n):
+    df = DF.copy()
+    df["wMA1"] = 2 * wMA(df,n/2) - wMA(df,n)
+    P = df["wMA1"].to_list()
+    n = round(np.sqrt(n))
+    W = []
+    d = n * (n+1) / 2
+    for i in range(0,len(df)):
+        w = 0
+        v = 1
+        if (i < n - 1):
+            W.append(np.nan)
+        else:
+            for j in range(i - n + 1, i + 1):
+                w += v * P[j]
+                v += 1
+            W.append(w/d)
+    df["HullMA"] = W
+    return df.HullMA
 
 # Difference from sMA normalized in std's
 def NormDiffsMA(DF,n):

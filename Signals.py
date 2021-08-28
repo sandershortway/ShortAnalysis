@@ -1,8 +1,8 @@
 import numpy as np
 import TechnicalIndicators as TA
-# Buy = -1, Sell = -1
 
-def RSI(df,n):
+def RSI(DF,n):
+    df = DF.copy()
     df["RSI"] = TA.RSI(df,n).RSI
     R = df.RSI.to_list()
     S = []
@@ -15,24 +15,17 @@ def RSI(df,n):
             S.append(0)
     df["RSIsignal"] = S
     return df.RSIsignal
-    
-def BB(df,n,m):
-    df = TA.BB(df,n,m)
-    P = df.Open.to_list()
-    H = df.BBhigh.to_list()
-    L = df.BBlow.to_list()
-    S = []
-    for i in range(0,len(P)):
-        if (P[i] <= L[i]):
-            S.append(-1)
-        elif (P[i] >= H[i]):
-            S.append(1)
-        else:
-            S.append(0)
-    df["BBsignal"] = S
-    return df.BBsignal
 
-def eMA(df,n):
+def Offset(DF,n):
+    df = DF.copy()
+    P = df.Open.to_list()
+    df["Avg"] = df.Open.rolling(n).mean()
+    df["StdDev"] = df.Open.rolling(n).std()
+    df["Offset"] = (df["Open"] - df["Avg"]) / df["StdDev"]
+    return df.Offset
+
+def eMA(DF,n):
+    df = DF.copy()
     df["eMA"] = TA.eMA(df,n)
     df.dropna()
     S = []
